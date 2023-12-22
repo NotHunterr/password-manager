@@ -30,6 +30,7 @@ fn main() {
             let trimmed_file_name = full_file_name.trim();
            
            if Path::new(&trimmed_file_name).exists() {
+            println!("File has been found! Continuing..\n");
             break;
            } else {
             println!("This is not a valid directory and file, please try again.");
