@@ -1,12 +1,22 @@
-use std::fs::File;
-use std::io::{self, Read};
-use std::path::{Path, PathBuf};
 use colored::Colorize;
+use serde::Serialize;
+use std::fs::{File, OpenOptions};
+use std::io;
+use std::path::{Path, PathBuf};
 
 /* -- TO-DO --
     - CREATE A BETTER WAY TO SEE IF THE USER HAS USED THIS PROGRAM BEFORE (PREF WITHOUT A DATABASE)
     - FIRST CHECK IF THE PATH IS CORRECT WHEN CREATING A NEW ORIGIN FILE, AND LOOP EARLIER AS TO NOT WASTE TIME
 */
+
+// Serde struct
+
+#[derive(Serialize)]
+struct Create_User {
+    website: String,
+    username: String,
+    password: String,
+}
 
 fn main() {
     let mut full_file_name = String::new();
@@ -91,7 +101,7 @@ fn main() {
     action = action.trim().to_string();
 
     match &action[..] {
-        "1" => create_pwds(),
+        "1" => create_pwds(full_file_name),
         // "2" => delete_pwds(),
         // "3" => edit_pwds(),
         // "4" => view_pwds(),
@@ -99,41 +109,70 @@ fn main() {
         _ => println!("Please enter a valid number."),
     }
     //  Add what the user can do!
-
-
 }
 
-
-fn create_pwds(){
-
+fn create_pwds(file_name: String) {
     loop {
-    // -- TO-DO -- Be able to add multiple usernames and passwords for one website! 
-    println!("Please enter the website that this password will be used for");
-    let mut website_name = String::new();
-    io::stdin().read_line(&mut website_name).expect("Invalid input.");
-    website_name = website_name.trim().to_string();
+        // -- TO-DO -- Be able to add multiple usernames and passwords for one website!
+        println!("Please enter the website that this password will be used for");
+        let mut website_name = String::new();
+        io::stdin()
+            .read_line(&mut website_name)
+            .expect("Invalid input.");
+        website_name = website_name.trim().to_string();
 
-    println!("Great! Now what is the username for {}", website_name);
-    let mut username = String::new();
-    io::stdin().read_line(&mut username).expect("Invalid input.");
-    username = username.trim().to_string();
+        println!("Great! Now what is the username for {}", website_name);
+        let mut username = String::new();
+        io::stdin()
+            .read_line(&mut username)
+            .expect("Invalid input.");
+        username = username.trim().to_string();
 
-    println!("Awesome, and now the password!");
-    let mut password = String::new();
-    io::stdin().read_line(&mut password).expect("Invalid input.");
-    password = password.trim().to_string();
- 
- println!("ta-da! the for the website {}, you have entered a username of {}, and a password of {}. Is all of this information correct?\n\t- yes [1]\n\t- no", website_name.bold().red(), username.bold().red(), password.bold().red());
- let mut save_info = String::new();
- io::stdin().read_line(&mut save_info).expect("Invalid input.");
-    save_info = save_info.trim().to_string();
+        println!("Awesome, and now the password!");
+        let mut password = String::new();
+        io::stdin()
+            .read_line(&mut password)
+            .expect("Invalid input.");
+        password = password.trim().to_string();
 
-    if save_info == "1" {
-        println!("Perfect! Saving now..");
-        break;
-    } 
-    
+        println!("ta-da! the for the website {}, you have entered a username of {}, and a password of {}. Is all of this information correct?\n\t- yes [1]\n\t- no [2]", website_name.bold().red(), username.bold().red(), password.bold().red());
+        let mut save_info = String::new();
+        io::stdin()
+            .read_line(&mut save_info)
+            .expect("Invalid input.");
+        save_info = save_info.trim().to_string();
+
+        match &save_info[..] {
+            "1" => {
+                println!("Awsome, saving credentials now...");
+
+                let data = Create_User {
+                    website: website_name,
+                    username: username,
+                    password: password,
+                };
+
+                let serialized_data = serde_json::to_string_pretty(&data).unwrap();
+
+                println!("{}", serialized_data);
+
+                break;
+            }
+            "2" => println!("Restarting program"),
+            _ => println!("Invalid input, restarting question."),
+        }
+
+        // now to the fun part!
+
+        // Serde!
+
+        // let file = OpenOptions::new()
+        //     .append(true)
+        //     .write(true)
+        //     .read(true);
+
+        // let mut file = file_name;
+
+        // file.write_all()
     }
-
-   
 }
