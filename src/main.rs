@@ -2,6 +2,7 @@ use colored::Colorize;
 use serde::Serialize;
 use std::fs::{File, OpenOptions};
 use std::io;
+use std::io::Write;
 use std::path::{Path, PathBuf};
 
 /* -- TO-DO --
@@ -12,7 +13,7 @@ use std::path::{Path, PathBuf};
 // Serde struct
 
 #[derive(Serialize)]
-struct Create_User {
+struct CreateUser {
     website: String,
     username: String,
     password: String,
@@ -146,7 +147,7 @@ fn create_pwds(file_name: String) {
             "1" => {
                 println!("Awsome, saving credentials now...");
 
-                let data = Create_User {
+                let data = CreateUser {
                     website: website_name,
                     username: username,
                     password: password,
@@ -154,27 +155,10 @@ fn create_pwds(file_name: String) {
 
                 let serialized_data = serde_json::to_string_pretty(&data).unwrap();
 
-                println!("{}", serialized_data);
-
-                break;
+                let mut data_file = OpenOptions::new().append(true).read(true);
             }
             "2" => println!("Restarting program"),
             _ => println!("Invalid input, restarting question."),
         }
-
-        // now to the fun part!
-
-        // Serde!
-
-        // let file = OpenOptions::new()
-        //     .append(true)
-        //     .write(true)
-        //     .read(true);
-
-        // let mut file = file_name;
-
-        // file.write_all()
-
-        // Testing push from second device.
     }
 }
