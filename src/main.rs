@@ -1,9 +1,10 @@
 use colored::Colorize;
 use serde::Serialize;
-use std::fs::{File, OpenOptions};
+use std::fs::{ File, OpenOptions };
 use std::io;
-use std::io::Write;
-use std::path::{Path, PathBuf};
+use std::io::{ Write, Error };
+use std::path::{ Path, PathBuf };
+
 
 /* -- TO-DO --
     - CREATE A BETTER WAY TO SEE IF THE USER HAS USED THIS PROGRAM BEFORE (PREF WITHOUT A DATABASE)
@@ -19,7 +20,7 @@ struct CreateUser {
     password: String,
 }
 
-fn main() {
+fn main() -> Return<(), ()> {
     let mut full_file_name = String::new();
 
     // Ask user if they have used the program before
@@ -108,11 +109,11 @@ fn main() {
         // "4" => view_pwds(),
         // "5" => update_pwds(),
         _ => println!("Please enter a valid number."),
-    }
+    };
     //  Add what the user can do!
 }
 
-fn create_pwds(file_name: String) {
+fn create_pwds(file_name: String) -> Result<(), ()> {
     loop {
         // -- TO-DO -- Be able to add multiple usernames and passwords for one website!
         println!("Please enter the website that this password will be used for");
@@ -154,9 +155,8 @@ fn create_pwds(file_name: String) {
                 };
 
                 let serialized_data = serde_json::to_string_pretty(&data).unwrap();
-
-                let mut data_file = OpenOptions::new().append(true).read(true);
-            }
+            }   
+   
             "2" => println!("Restarting program"),
             _ => println!("Invalid input, restarting question."),
         }
