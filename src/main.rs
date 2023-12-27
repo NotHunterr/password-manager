@@ -1,9 +1,9 @@
-use colored::Colorize;
-use serde::Serialize;
-use std::fs::{ File, OpenOptions };
 use std::io;
-use std::io::{ Write, Error };
+use colored::Colorize;
 use std::path::{ Path, PathBuf };
+use std::fs::{ File, OpenOptions };
+use std::io::{ Write, Read, Seek, SeekFrom};
+use serde::{ Serialize, Deserialize };
 
 
 /* -- TO-DO --
@@ -13,14 +13,14 @@ use std::path::{ Path, PathBuf };
 
 // Serde struct
 
-#[derive(Serialize)]
+#[derive(Serialize, Debug, Deserialize)]
 struct CreateUser {
     website: String,
     username: String,
     password: String,
 }
 
-fn main() -> Return<(), ()> {
+fn main() {
     let mut full_file_name = String::new();
 
     // Ask user if they have used the program before
@@ -85,7 +85,7 @@ fn main() -> Return<(), ()> {
                     Ok(_) => {
                         println!("Origin file successfully created!");
                         // Break out of the loop if the file creation is successful
-                        break;
+                        break; 
                     }
                     Err(e) => eprintln!("Error creating file, {}", e),
                 }
@@ -113,7 +113,7 @@ fn main() -> Return<(), ()> {
     //  Add what the user can do!
 }
 
-fn create_pwds(file_name: String) -> Result<(), ()> {
+fn create_pwds(file_name: String) {
     loop {
         // -- TO-DO -- Be able to add multiple usernames and passwords for one website!
         println!("Please enter the website that this password will be used for");
@@ -148,13 +148,46 @@ fn create_pwds(file_name: String) -> Result<(), ()> {
             "1" => {
                 println!("Awsome, saving credentials now...");
 
-                let data = CreateUser {
-                    website: website_name,
-                    username: username,
-                    password: password,
+                let mut file = OpenOptions::new()
+                    .append(true)
+                    .read(true)
+                    .write(true)
+                    .open(file_name.trim()).expect("Could not open file");
+
+                let mut existing_data = String::new();
+
+                file.read_to_string(&mut existing_data)
+                    .expect("Could not read data from the file");
+                
+                // Deserialize data into a vector
+                let mut data: Vec<CreateUser> = serde_json::from_str(&existing_data)
+                    .unwrap_or_else(|_| Vec::new());
+                
+                // Adding a new entry
+
+                let new_user = CreateUser {
+                    website: website_name.to_string(),
+                    username: username.to_string(),
+                    password: password.to_string(),
                 };
 
-                let serialized_data = serde_json::to_string_pretty(&data).unwrap();
+                data.push(new_user);
+
+                // Serialize back into JSON
+
+                let updated_data = serde_json::to_string_pretty(&data)
+                    .expect("Could not serialize data");
+
+                // Write back to JSON
+
+                file.seek(SeekFrom::Start(0))
+                    .expect("Could not seek the beginning of the file");
+
+                file.set_len(0)
+                    .expect("Could not truncate the file");
+                
+                file.write_all(updated_data.as_bytes()).expect("Could not write data");
+                break;                
             }   
    
             "2" => println!("Restarting program"),
