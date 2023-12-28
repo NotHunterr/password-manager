@@ -57,6 +57,7 @@ fn main() {
         // Search to see if the file that they input exists.
     } else if &used_before == "2" {
         loop {
+
             // Prompt for the directory
             println!("Welcome to the CLI password manager! If this is your first time using this program,\nplease enter the directory to the main password file that you would like to create.");
             let mut directory = String::new();
@@ -73,10 +74,12 @@ fn main() {
 
             // Trim leading and trailing whitespaces from directory and file_name
             let directory = directory.trim();
-            let full_file_name = format!("{}.JSON", file_name.trim());
+            let file_name = file_name.trim();
+            full_file_name = format!("{}.json", file_name);
 
             let mut file_path = PathBuf::from(&directory);
             file_path.push(&full_file_name);
+
 
             if file_path.exists() {
                 eprintln!("It seems as if this file directory and name already exist, please try again.\n");
@@ -146,8 +149,8 @@ fn create_pwds(file_name: String) {
 
         match &save_info[..] {
             "1" => {
+
                 println!("Awsome, saving credentials now...");
-                println!("{}", file_name);
 
                 let mut file =  OpenOptions::new()
                     .create(true)
