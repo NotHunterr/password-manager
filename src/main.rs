@@ -147,12 +147,14 @@ fn create_pwds(file_name: String) {
         match &save_info[..] {
             "1" => {
                 println!("Awsome, saving credentials now...");
+                println!("{}", file_name);
 
-                let mut file = OpenOptions::new()
-                    .append(true)
+                let mut file =  OpenOptions::new()
+                    .create(true)
                     .read(true)
                     .write(true)
-                    .open(file_name.trim()).expect("Could not open file");
+                    // Error here when creating a new file!!! Fix please :D
+                    .open(file_name.trim()).unwrap();
 
                 let mut existing_data = String::new();
 
@@ -179,6 +181,7 @@ fn create_pwds(file_name: String) {
                     .expect("Could not serialize data");
 
                 // Write back to JSON
+
 
                 file.seek(SeekFrom::Start(0))
                     .expect("Could not seek the beginning of the file");
